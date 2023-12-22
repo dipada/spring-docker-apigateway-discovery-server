@@ -1,1 +1,30 @@
 services:
+  registry:
+    build: ./registry
+    container_name: registry
+    expose:
+      - "8761"
+    ports:
+      - "8761:8761"
+  service1:
+    build: ./service1
+    container_name: service1
+    ports:
+      - "8762:8762"
+    depends_on:
+      - registry
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - eureka.client.serviceUrl.defaultZone=http://registry:8761/eureka/
+
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    ports:
+      - "8760:8760"
+    depends_on:
+      - registry
+      - service1
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - eureka.client.serviceUrl.defaultZone=http://registry:8761/eureka/
